@@ -1,6 +1,0 @@
----
-- name: Prepare all Raspberry Pi nodes
-  hosts: all
-  become: true
-  roles:
-    - roles/rpi-base

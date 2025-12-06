@@ -1,0 +1,13 @@
+---
+# - name: Prepare all Raspberry Pi nodes
+#   hosts: all
+#   become: true
+#   roles:
+#     - roles/rpi-base
+
+- name: Deploy Kiosk
+  hosts: kiosk
+  become: true
+  roles:
+    - roles/kiosk
+    
