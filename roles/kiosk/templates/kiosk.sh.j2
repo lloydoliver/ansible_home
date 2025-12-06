@@ -1,0 +1,6 @@
+#!/bin/bash
+{% set res = kiosk_resolution.split('x') %}
+{% set width = res[0] %}
+{% set height = res[1] %}
+/usr/bin/chromium --app={{ kiosk_url }} --noerrdialogs --disable-infobars --kiosk --window-position=0,0 --window-size={{ width }},{{ height }}
+

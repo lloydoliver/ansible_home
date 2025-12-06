@@ -1,0 +1,14 @@
+[Unit]
+Description=Home Assistant Kiosk
+Wants=graphical.target
+After=graphical.target
+
+[Service]
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/bash /opt/kiosk/kiosk.sh
+Restart=always
+User={{ kiosk_user }}
+Group={{ kiosk_user }}
+
+[Install]
+WantedBy=graphical.target

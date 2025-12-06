@@ -1,0 +1,4 @@
+---
+roles_enabled:
+  - docker
+  - logging

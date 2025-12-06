@@ -1,0 +1,74 @@
+---
+- name: Ensure kiosk user exists
+  user:
+    name: "{{ kiosk_user }}"
+    shell: /bin/bash
+    create_home: yes
+
+- name: Install kiosk packages
+  ansible.builtin.apt:
+    name: "{{ kiosk_packages}}"
+    state: present
+    update_cache: yes
+
+- name: Ensure graphical target is default
+  systemd:
+    name: graphical.target
+    enabled: yes
+    daemon_reload: yes
+
+- name: Configure LightDM settings
+  block:
+    - name: Ensure lightdm.conf has autologin
+      lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: '^#?autologin-user='
+        line: "autologin-user={{ kiosk_user }}"
+      notify: reboot_system
+
+    - name: Ensure lightdm.conf has display setup script
+      lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: '^#?display-setup-script='
+        line: "display-setup-script=xrandr -s {{ kiosk_resolution }}{% if kiosk_rotation is defined %} -o {{ kiosk_rotation }}{% endif %}"
+      notify: reboot_system
+
+    - name: Ensure lightdm.conf has xserver command
+      lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: '^#?xserver-command='
+        line: "xserver-command=X -s 0 dpms"
+      notify: reboot_system
+
+- name: Create kiosk directory
+  file:
+    path: /opt/kiosk
+    state: directory
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0755'
+
+- name: Deploy kiosk script
+  template:
+    src: kiosk.sh.j2
+    dest: /opt/kiosk/kiosk.sh
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user }}"
+    mode: '0755'
+  notify: restart kiosk
+
+- name: Deploy systemd service
+  template:
+    src: kiosk.service.j2
+    dest: /lib/systemd/system/kiosk.service
+    mode: '0644'
+  notify: 
+    - reload kiosk systemd
+    - restart kiosk
+
+- name: Reload and enable kiosk service
+  systemd:
+    name: kiosk
+    daemon_reload: yes
+    enabled: yes
+    state: started

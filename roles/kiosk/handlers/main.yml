@@ -1,0 +1,14 @@
+- name: reload kiosk systemd
+  systemd:
+    name: kiosk
+    daemon_reload: yes
+    enabled: yes
+    state: started
+
+- name: restart kiosk   
+  systemd:
+    name: kiosk
+    state: restarted
+
+- name: reboot_system
+  reboot:

@@ -1,0 +1,10 @@
+---
+kiosk_resolution: "1920x1080"
+kiosk_rotation: "right"
+kiosk_url: "http://homeassistant.local:8123"
+kiosk_user: "kiosk"
+kiosk_packages:
+  - chromium
+  - lightdm
+  - sed
+  - xserver-xorg
