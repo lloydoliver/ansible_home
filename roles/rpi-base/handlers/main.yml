@@ -1,0 +1,9 @@
+---
+# handlers file for update-linux
+- name: restart_ssh
+  service:
+    name: ssh
+    state: restarted
+
+- name: reboot_system
+  reboot:

@@ -1,0 +1,6 @@
+--- 
+# RPI-Base main.yml
+- import_tasks: disable_ipv6.yaml
+- import_tasks: apt.yml
+- import_tasks: ssh.yml
+- import_tasks: firmware.yml

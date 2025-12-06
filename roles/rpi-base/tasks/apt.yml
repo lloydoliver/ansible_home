@@ -1,0 +1,31 @@
+---
+- name: Update all packages to their latest version on Debian Family
+  apt:
+    name: "*"
+    state: latest
+    force_apt_get: true
+    update_cache: true
+    cache_valid_time: 3600
+  notify:
+    - reboot_system
+  when:
+    - ansible_facts["os_family"] == 'Debian'
+  tags:
+    - configuration
+    - apt
+
+- name: Install packages
+  apt:
+    name: "{{ apt_install_packages }}"
+    state: latest
+  tags:
+    - configuration
+    - apt
+
+- name: autoremove
+  apt:
+    autoremove: true
+  when: apt_autoremove | bool
+  tags:
+    - configuration
+    - apt

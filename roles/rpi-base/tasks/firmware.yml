@@ -1,0 +1,52 @@
+---
+- name: Disable onboard Wi-Fi
+  lineinfile:
+    path: /boot/firmware/config.txt
+    line: 'dtoverlay=disable-wifi'
+    state: present
+  when: disable_wifi
+  notify:
+    - reboot_system
+  tags:
+    - configuration
+    - firmware
+    - wifi
+
+- name: Disable onboard Audio
+  lineinfile:
+    path: /boot/firmware/config.txt
+    regexp: "^dtparam=audio"
+    line: "dtparam=audio=off" 
+  when: disable_audio
+  notify:
+    - reboot_system
+  tags:
+    - configuration
+    - firmware
+    - wifi
+
+- name: Disable onboard Bluetooth
+  lineinfile:
+    path: /boot/firmware/config.txt
+    line: 'dtoverlay=disable-bt'
+    state: present
+  when: disable_bt
+  notify:
+    - reboot_system
+  tags:
+    - configuration
+    - firmware
+    - bluetooth
+
+- name: Reduce GPU memory
+  lineinfile:
+    path: /boot/firmware/config.txt
+    regexp: '^gpu_mem='
+    line: 'gpu_mem=16'
+    state: present
+  notify:
+    - reboot_system
+  tags:
+    - configuration
+    - firmware
+    - gpu
