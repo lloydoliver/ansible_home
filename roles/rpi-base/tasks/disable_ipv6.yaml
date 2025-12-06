@@ -17,6 +17,7 @@
 - name: check if ipv6 aleady disable in firmware
   shell: grep -c "ipv6.disable" /boot/firmware/cmdline.txt || true
   check_mode: false
+  changed_when: false
   register: ipv6_firmware_status
 
 - name: disable IPV6 in firmware
