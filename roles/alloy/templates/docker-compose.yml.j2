@@ -1,0 +1,32 @@
+---
+networks:
+  alloy:
+
+services:
+  alloy:
+    image: grafana/alloy:latest
+    restart: unless-stopped
+    hostname: {{ inventory_hostname }}-alloy
+    volumes:
+      - alloy_data:/var/lib/alloy/data
+      - /opt/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/log:/var/log
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/rootfs:ro
+      - /run:/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker/:ro
+      - /run/udev/data:/run/udev/data:ro
+    command:  
+      - run 
+      - --server.http.listen-addr=0.0.0.0:12345 
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    networks:
+      - alloy
+
+volumes:
+  alloy_data:
+    driver: local

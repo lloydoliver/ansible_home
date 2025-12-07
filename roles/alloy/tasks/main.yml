@@ -1,0 +1,39 @@
+---
+- name: "[ Alloy ] Create Directory"
+  file:
+    path: /opt/alloy/
+    state: directory
+
+- name: "[ Alloy ] Copy config"
+  template:
+    src: config.alloy.j2
+    dest: /opt/alloy/config.alloy
+
+- name: "[ Alloy ] Deploy container"
+  block:
+    - name: "[ Alloy ] Copy compose file"
+      template:
+        src: docker-compose.yml.j2
+        dest: /opt/alloy/docker-compose.yml
+      when: "'docker_hosts' in group_names"
+
+    - name: "[ Alloy ] Pull containers"
+      community.docker.docker_compose_v2_pull:
+        project_src: /opt/alloy/
+      register: pull_output
+      when: "'docker_hosts' in group_names"
+
+    - debug:
+        var: pull_output
+      when: "'docker_hosts' in group_names"
+
+    - name: "[ Alloy ] `docker compose up`"
+      community.docker.docker_compose_v2:
+        project_src: /opt/alloy/
+      register: output
+      when: "'docker_hosts' in group_names"
+
+    - name: Show results
+      debug:
+        var: output
+      when: "'docker_hosts' in group_names"
