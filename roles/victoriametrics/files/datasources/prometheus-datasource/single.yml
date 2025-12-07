@@ -9,3 +9,9 @@ datasources:
       jsonData:
         prometheusType: Prometheus
         prometheusVersion: 2.24.0
+    - name: loki
+      type: loki
+      access: proxy
+      url: http://10.200.251.2:3100
+      jsonData:
+        maxLines: 1000

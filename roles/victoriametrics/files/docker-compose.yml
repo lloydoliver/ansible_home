@@ -14,7 +14,7 @@ services:
     command:
       - "--promscrape.config=/etc/prometheus/prometheus.yml"
       - "--remoteWrite.url=http://victoriametrics:8428/api/v1/write"
-    restart: always
+    restart: unless-stopped
   # VictoriaMetrics instance, a single process responsible for
   # storing metrics and serve read requests.
   victoriametrics:
@@ -35,7 +35,7 @@ services:
       - "--httpListenAddr=:8428"
       - "--influxListenAddr=:8089"
       - "--vmalert.proxyURL=http://vmalert:8880"
-    restart: always
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:11.5.0
@@ -50,7 +50,7 @@ services:
       - ./dashboards/victoriametrics.json:/var/lib/grafana/dashboards/vm.json
       - ./dashboards/vmagent.json:/var/lib/grafana/dashboards/vmagent.json
       - ./dashboards/vmalert.json:/var/lib/grafana/dashboards/vmalert.json
-    restart: always
+    restart: unless-stopped
 
   # vmalert executes alerting and recording rules
   vmalert:
