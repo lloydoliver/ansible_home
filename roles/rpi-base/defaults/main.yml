@@ -1,7 +1,9 @@
 #SPDX-License-Identifier: MIT-0
 ---
 apt_autoremove: true
-apt_install_packages: []
+apt_install_packages: 
+  - rsyslog
+  - vim
 apt_remove_packages: []
 disable_wifi: true
 disable_bt: true
