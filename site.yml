@@ -5,9 +5,20 @@
   roles:
     - roles/rpi-base
 
+- name: Deploy Docker
+  hosts: docker_hosts
+  become: true
+  roles:
+    - docker
+
 - name: Deploy Kiosk
   hosts: kiosk
   become: true
   roles:
     - roles/kiosk
-    
+
+- name: Deploy Monitoring Stack
+  hosts: monitoring_hosts
+  become: true
+  roles:
+    - roles/monitoring

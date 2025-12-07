@@ -1,3 +1,4 @@
 ---
 kiosk_url: http://192.168.178.6:8123
 kiosk_resolution: 1920x1080
+docker_edition: ce

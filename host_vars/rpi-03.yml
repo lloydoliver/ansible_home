@@ -1,3 +1,2 @@
 ---
-roles_enabled:
-  - ids
+disable_wifi: false

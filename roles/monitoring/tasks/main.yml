@@ -1,0 +1,43 @@
+---
+- name: "[ Monitoring ] create dirs"
+  file:
+    path: /opt/victoriametrics/
+    state: directory
+
+- name: "[ Monitoring ] Copy files"
+  block:
+    - name: "Add directories"
+      file:
+        state: directory
+        path: "/opt/victoriametrics/{{ item.path }}"
+      loop: >-
+        {{ lookup('filetree', '.')
+        | selectattr('state', 'equalto', 'directory')
+        }}
+
+    - name: "Add files"
+      copy:
+        src: "{{ item.path }}"
+        dest: "/opt/victoriametrics/{{ item.path }}"
+      loop: >-
+        {{ lookup('filetree', '.')
+        | selectattr('state', 'equalto', 'file')
+        | selectattr('path', 'regex', '[^~#]$')
+        }}
+  
+- name: "[ Monitoring ] Pull containers"
+  community.docker.docker_compose_v2_pull:
+    project_src: /opt/victoriametrics/
+  register: pull_output
+
+- debug:
+    var: pull_output
+
+- name: "[ Monitoring ] `docker compose up`"
+  community.docker.docker_compose_v2:
+    project_src: /opt/victoriametrics/
+  register: output
+  
+- name: Show results
+  debug:
+    var: output
