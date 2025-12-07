@@ -1,0 +1,32 @@
+---
+- name: "[ Loki ] Create Directory"
+  file:
+    path: /opt/loki/
+    state: directory
+
+- name: "[ Loki ] Copy config"
+  template:
+    src: loki-config.j2
+    dest: /opt/loki/config.yaml
+
+- name: "[ Loki ] Copy compose file"
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/loki/docker-compose.yml
+
+- name: "[ Loki ] Pull containers"
+  community.docker.docker_compose_v2_pull:
+    project_src: /opt/loki/
+  register: pull_output
+
+- debug:
+    var: pull_output
+
+- name: "[ Loki] docker compose up`"
+  community.docker.docker_compose_v2:
+    project_src: /opt/loki/
+  register: output
+
+- name: Show results
+  debug:
+    var: output
