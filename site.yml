@@ -4,21 +4,46 @@
   become: true
   roles:
     - roles/rpi-base
+  tags: rpi-base
 
 - name: Deploy Docker
   hosts: docker_hosts
   become: true
   roles:
     - docker
+  tags: docker
+
+- name: Deploy Monitoring Stack
+  hosts: monitoring_hosts
+  become: true
+  roles:
+    - roles/victoriametrics
+  tags: 
+    - monitoring
+    - victoriametrics
+
+- name: Deploy Logging Stack
+  hosts: logging_hosts
+  become: true
+  roles:
+    - roles/loki
+  tags:
+    - logging
+    - loki
+
+- name: Deploy monitoring agents
+  hosts: all
+  become: true
+  roles:
+    - roles/alloy
+  tags:
+    - alloy
+    - agents
 
 - name: Deploy Kiosk
   hosts: kiosk
   become: true
   roles:
     - roles/kiosk
-
-- name: Deploy Monitoring Stack
-  hosts: monitoring_hosts
-  become: true
-  roles:
-    - roles/monitoring
+  tags:
+    - kiosk
