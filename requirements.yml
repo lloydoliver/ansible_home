@@ -1,3 +1,4 @@
 ---
-- name: docker
-  src: geerlingguy.docker
+roles:
+  - name: docker
+    src: geerlingguy.docker
