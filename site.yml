@@ -31,15 +31,6 @@
     - logging
     - loki
 
-- name: Deploy monitoring agents
-  hosts: all
-  become: true
-  roles:
-    - roles/alloy
-  tags:
-    - alloy
-    - agents
-
 - name: Deploy Kiosk
   hosts: kiosk
   become: true
