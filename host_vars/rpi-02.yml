@@ -1,4 +1,4 @@
 ---
-kiosk_url: http://192.168.178.6:8123
+kiosk_url: http://10.200.252.2:3000/d/ef6fcxzs7yadcb/home-infra?orgId=1&from=now-5m&to=now&timezone=browser&kiosk&refresh=5s
 kiosk_resolution: 1920x1080
 docker_edition: ce
