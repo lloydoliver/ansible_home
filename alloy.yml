@@ -1,5 +1,5 @@
 - name: Install Alloy
-  hosts: rpi-03
+  hosts: rpis
   become: true
   tags:
     - alloy
