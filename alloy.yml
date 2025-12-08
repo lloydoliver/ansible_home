@@ -1,0 +1,146 @@
+- name: Install Alloy
+  hosts: rpi-03
+  become: true
+  tags:
+    - alloy
+  tasks:
+    - name: Install Alloy
+      ansible.builtin.include_role:
+        name: grafana.grafana.alloy
+      vars:
+        alloy_config: |
+          prometheus.scrape "default" {
+            targets = [{"__address__" = "localhost:12345"}]
+            forward_to = [prometheus.remote_write.victoriametrics.receiver]
+          }
+          //-- Targets
+          loki.write "loki" {
+            endpoint {
+              url = "http://10.200.251.2:3100/loki/api/v1/push"
+            }
+            external_labels = {}
+          }
+
+          prometheus.remote_write "victoriametrics" {
+            endpoint {
+              url = "http://10.200.252.2:8428/api/v1/write"
+            }
+          }
+          //-- End Targets
+          //-- Begin Local File logs
+          local.file_match "local_files" {
+            path_targets = [{"__path__" = "/var/log/*.log"}]
+            sync_period = "5s"
+          }
+
+          loki.source.file "log_scrape" {
+            targets			  = local.file_match.local_files.targets
+            forward_to		= [loki.process.filter_logs.receiver]
+            tail_from_end	= true
+          }
+
+          loki.process "filter_logs" {
+            stage.static_labels {
+              values = {
+                instance = constants.hostname,
+              }
+            }
+            forward_to	= [loki.write.loki.receiver]
+          }
+          //-- End File logs
+          //-- Begin docker logs
+          discovery.docker "docker" {
+            host = "unix:///var/run/docker.sock"
+          }
+
+          discovery.relabel "logs_integrations_docker" {
+            targets = []
+
+            rule {
+              source_labels = ["__meta_docker_container_name"]
+              regex = "/(.*)"
+              target_label = "service_name"
+            }
+          }
+          loki.source.docker "local" {
+            host       = "unix:///var/run/docker.sock"
+            targets    = discovery.docker.docker.targets
+            labels     = {"platform" = "docker"}
+            relabel_rules = discovery.relabel.logs_integrations_docker.rules
+            forward_to = [loki.write.loki.receiver]
+          }
+          //-- End docker logs
+          //-- Node Exporter
+          discovery.relabel "integrations_node_exporter" {
+            targets = prometheus.exporter.unix.integrations_node_exporter.targets
+
+            rule {
+              target_label = "instance"
+              replacement  = constants.hostname
+            }
+
+            rule {
+              target_label = "job"
+              replacement = "integrations/node_exporter"
+            }
+          }
+
+          prometheus.exporter.unix "integrations_node_exporter" {
+
+          }
+
+          prometheus.scrape "integrations_node_exporter" {
+            targets    = discovery.relabel.integrations_node_exporter.output
+            forward_to = [prometheus.remote_write.victoriametrics.receiver]
+            job_name   = "integrations/node_exporter"
+          }
+          //-- End Node Exporter
+
+          //-- Suricata
+          local.file_match "suricata_eve" {
+            path_targets = [
+              {"__path__" = "/var/log/eve.json"},
+              {"__PATH__" = "/var/log/suricata/eve-*.json"},
+            ]
+            sync_period = "5s"
+          }
+
+          loki.source.file "suricata" {
+            targets       = local.file_match.suricata_eve.targets
+            forward_to    = [loki.process.suricata.receiver]
+            tail_from_end = true
+          }
+
+          loki.process "suricata" {
+            stage.json {
+              expressions = {
+                timestamp = "timestamp",
+                event_type = "event_type",
+                src_ip = "src_ip",
+                dest_ip = "dest_ip",
+                proto = "proto",
+                flow_id = "flow_id",
+              }
+            }
+
+            stage.timestamp {
+              source = "timestamp"
+              format = "RFC3339"
+            }
+
+            stage.labels {
+              values = {
+                event_type = "",
+                src_ip = "",
+                dest_ip = "",
+                proto = "",
+              }
+            }
+
+            stage.drop {
+              source = "event_type"
+              expression = "stats"
+            }
+
+            forward_to = [loki.write.loki.receiver]
+          }
